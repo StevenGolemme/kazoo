@@ -985,18 +985,19 @@ get_system_token_restrictions(Method) ->
 get_account_token_restrictions(AccountId, Method) ->
     AccountDB = wh_util:format_account_db(AccountId),
     case couch_mgr:open_cache_doc(AccountDB, ?CB_ACCOUNT_TOKEN_RESTRICTIONS) of
+        {'error', _} -> 'undefined';
         {'ok', RestrictionsDoc} ->
             wh_json:get_first_defined(
               [[<<"restrictions">>, wh_util:to_binary(Method)]
                ,[<<"restrictions">>, <<"_">>]
               ]
               ,RestrictionsDoc
-             );
-        {'error', _} -> 'undefined'
+             )
     end.
 
--spec get_priv_level_restrictions(api_object(), api_binary()) -> api_object().
-get_priv_level_restrictions('undefined', _PrivLevel) -> 'undefined';
+-spec get_priv_level_restrictions(api_object(), ne_binary()) -> api_object().
+get_priv_level_restrictions('undefined', _PrivLevel) ->
+    'undefined';
 get_priv_level_restrictions(Restrictions, PrivLevel) ->
     RestrictionLevels = wh_json:get_keys(Restrictions),
     case lists:member(PrivLevel, RestrictionLevels) of
